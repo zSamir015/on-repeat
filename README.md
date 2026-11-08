@@ -6,6 +6,8 @@ previewed in place, and every album has its own page with a playable tracklist. 
 backend: content lives in local data files and audio comes from the public iTunes 30-second
 previews.
 
+Live demo: https://zsamir015.github.io/on-repeat/
+
 ![Home](docs/screenshots/home.png)
 
 | | |
@@ -27,8 +29,12 @@ Requires Node 20.9 or newer.
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm run build && npm start
+npm run build && npm run preview   # serves the static export in out/
 ```
+
+The build is a static export (`out/`). `NEXT_PUBLIC_BASE_PATH` sets the sub-path the site is
+served from and `NEXT_PUBLIC_SITE_URL` the absolute URL used for share metadata; both are unset
+locally.
 
 Checks:
 
@@ -36,6 +42,11 @@ Checks:
 npm run lint
 npm run typecheck
 ```
+
+## Deployment
+
+`.github/workflows/pages.yml` lints, builds the export with the repository name as base path and
+publishes `out/` to GitHub Pages on every push to `main`.
 
 ## Structure
 
@@ -45,7 +56,6 @@ src/
     page.tsx                 home
     album/[slug]/page.tsx    album pages, statically generated per release
     marca/page.tsx           brand guide (logo, color, type, voice)
-    opengraph-image.tsx      share card, rendered at build time
   components/
     three/                   WebGL hero: chrome wordmark and studio lighting
     player/                  shared audio player, mini player bar
@@ -60,6 +70,7 @@ public/
   covers/                    album artwork
   brand/                     logo SVGs
   fonts/                     typeface JSON for the 3D type
+  og.png                     share card
 docs/
   brand-guidelines.md
 ```

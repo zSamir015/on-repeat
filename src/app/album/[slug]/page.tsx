@@ -6,6 +6,9 @@ import tracklists from "@/content/tracklists.json";
 
 type Tracklists = Record<string, { released: string; copyright: string | null; tracks: { n: number; name: string; ms: number; preview: string | null }[] }>;
 
+// Only the releases known at build time exist; anything else is a 404.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return releases.map((r) => ({ slug: r.slug }));
 }

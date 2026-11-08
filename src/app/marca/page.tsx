@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { RotatingBadge } from "@/components/RotatingBadge";
 import { releases } from "@/content/releases";
+import { asset } from "@/lib/asset";
 
 export const metadata: Metadata = {
   title: "Marca — On Repeat",
@@ -74,10 +75,10 @@ export default function BrandPage() {
           <ul className="grid gap-[10px] sm:grid-cols-2">
             {DOWNLOADS.map((d) => (
               <li key={d.file}>
-                <a href={`/brand/${d.file}`} download className="group block no-underline">
+                <a href={asset(`/brand/${d.file}`)} download className="group block no-underline">
                   <span className={`grid aspect-[16/9] place-items-center p-[25px] ${d.bg}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/brand/${d.file}`} alt={d.label} className="max-h-[60%] max-w-[80%]" />
+                    <img src={asset(`/brand/${d.file}`)} alt={d.label} className="max-h-[60%] max-w-[80%]" />
                   </span>
                   <span className="mt-[8px] flex justify-between text-[14px]">
                     <span>{d.label}</span>

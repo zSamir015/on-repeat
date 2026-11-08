@@ -1,3 +1,5 @@
+import { asset } from "@/lib/asset";
+
 // Placeholder catalog built from well-known pop releases so the layout can be judged with real
 // covers. Artwork and names belong to the artists and their labels; swap for On Repeat's own
 // emerging artists before any public launch.
@@ -31,7 +33,7 @@ export const featuredDrop = {
   title: "DeBÍ TiRAR MáS FOToS",
   format: "ALBUM",
   status: "Ya disponible · 2025",
-  cover: "/covers/debi-tirar-mas-fotos.jpg",
+  cover: asset("/covers/debi-tirar-mas-fotos.jpg"),
   /** Gels that orbit the chrome: plantain green and late-afternoon sun from the cover. */
   accents: ["#4fa83a", "#ffb547"],
 };
@@ -45,7 +47,7 @@ export const releases: Release[] = [
     genre: "Pop",
     year: 2024,
     blurb: "Pop corto y con veneno dulce. Doce canciones que no pierden el tiempo.",
-    cover: "/covers/short-n-sweet.jpg",
+    cover: asset("/covers/short-n-sweet.jpg"),
     color: "#2a56a3",
     ink: "#fff4ea",
     track: "Espresso",
@@ -59,7 +61,7 @@ export const releases: Release[] = [
     genre: "Alt pop",
     year: 2024,
     blurb: "Para escuchar de corrido, con audífonos y la luz apagada.",
-    cover: "/covers/hit-me-hard-and-soft.jpg",
+    cover: asset("/covers/hit-me-hard-and-soft.jpg"),
     color: "#0e2840",
     ink: "#e9eef5",
     track: "BIRDS OF A FEATHER",
@@ -73,7 +75,7 @@ export const releases: Release[] = [
     genre: "Synth pop",
     year: 2023,
     blurb: "Brillo, drama y coros hechos para cantarlos a gritos con tus amigas.",
-    cover: "/covers/midwest-princess.jpg",
+    cover: asset("/covers/midwest-princess.jpg"),
     color: "#f2cfae",
     ink: "#5e1d0c",
     track: "Good Luck, Babe!",
@@ -87,7 +89,7 @@ export const releases: Release[] = [
     genre: "Música urbana",
     year: 2025,
     blurb: "Salsa, plena y reggaetón con nostalgia de Puerto Rico.",
-    cover: "/covers/debi-tirar-mas-fotos.jpg",
+    cover: asset("/covers/debi-tirar-mas-fotos.jpg"),
     color: "#2e5a2b",
     ink: "#f4efd6",
     track: "DtMF",
@@ -101,7 +103,7 @@ export const releases: Release[] = [
     genre: "Dance pop",
     year: 2024,
     blurb: "Club, verde lima y cero filtro.",
-    cover: "/covers/brat.jpg",
+    cover: asset("/covers/brat.jpg"),
     color: "#8ace00",
     ink: "#000000",
     track: "360",
@@ -115,7 +117,7 @@ export const releases: Release[] = [
     genre: "Pop",
     year: 2024,
     blurb: "Pop de verano con psicodelia suave.",
-    cover: "/covers/radical-optimism.jpg",
+    cover: asset("/covers/radical-optimism.jpg"),
     color: "#0b5c63",
     ink: "#eef6f5",
     track: "Houdini",
@@ -129,7 +131,7 @@ export const releases: Release[] = [
     genre: "Pop / R&B",
     year: 2024,
     blurb: "Un álbum de ruptura que suena a terapia con buen beat.",
-    cover: "/covers/eternal-sunshine.jpg",
+    cover: asset("/covers/eternal-sunshine.jpg"),
     color: "#ba976c",
     ink: "#231710",
     track: "we can't be friends (wait for your love)",
@@ -143,7 +145,7 @@ export const releases: Release[] = [
     genre: "Dance pop",
     year: 2025,
     blurb: "Vuelta a la pista: oscuro, teatral y bailable.",
-    cover: "/covers/mayhem.jpg",
+    cover: asset("/covers/mayhem.jpg"),
     color: "#c4c4c4",
     ink: "#111111",
     track: "Abracadabra",

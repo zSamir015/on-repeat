@@ -5,9 +5,10 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useMemo, useRef } from "react";
 import { MathUtils, type Group } from "three";
 import { audioLevel } from "../player/PlayerProvider";
+import { asset } from "@/lib/asset";
 import { StudioEnvironment } from "./StudioEnvironment";
 
-const FONT = "/fonts/inter-light.typeface.json";
+const FONT = asset("/fonts/inter-light.typeface.json");
 const TRACKING = -0.053; // em, same as the display type in CSS
 const LINE_ADVANCE = 0.98; // em between baselines when the name breaks onto two lines
 const CAP = 0.727; // Inter cap height in em
