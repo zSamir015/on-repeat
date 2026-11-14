@@ -10,8 +10,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, ViewTransition } from "react";
-import { spotifySearch, type Release } from "@/content/releases";
+import { leadSingle, spotifySearch, type Release } from "@/content/releases";
 import { OutlinedArrowLink } from "./OutlinedArrowLink";
+import { PlayIcon } from "./player/PlayIcon";
+import { usePlayer } from "./player/PlayerProvider";
 
 const spring = { type: "spring", duration: 0.7, bounce: 0.15 } as const;
 
@@ -31,9 +33,22 @@ const kickerFor: Record<Release["format"], string> = {
   Album: "ALBUM",
 };
 
-function Showcase({ release, flip }: { release: Release; flip: boolean }) {
+function Showcase({
+  release,
+  index,
+  total,
+  flip,
+}: {
+  release: Release;
+  index: number;
+  total: number;
+  flip: boolean;
+}) {
   const reduce = useReducedMotion() ?? false;
   const frameRef = useRef<HTMLDivElement>(null);
+  const player = usePlayer();
+  const lead = leadSingle(release);
+  const sounding = player.isPlaying(lead.id);
 
   // The cover drifts slightly against the scroll, like a print pinned a few centimetres off the wall.
   const { scrollYProgress } = useScroll({ target: frameRef, offset: ["start end", "end start"] });
@@ -63,6 +78,18 @@ function Showcase({ release, flip }: { release: Release; flip: boolean }) {
             </motion.div>
           </ViewTransition>
         </Link>
+
+        {/* Quick play button in the bottom-left corner of the cover */}
+        <button
+          type="button"
+          onClick={() => player.toggle(lead)}
+          aria-label={sounding ? `Pausar ${release.track}` : `Escuchar preview de ${release.track}`}
+          className="absolute bottom-0 left-0 z-10 flex h-[52px] items-center gap-[10px] px-[16px] text-[13px] font-medium transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.96]"
+          style={{ backgroundColor: release.ink, color: release.color }}
+        >
+          <PlayIcon playing={sounding} size={14} />
+          <span>{sounding ? `Pausar · ${release.track}` : `Preview · ${release.track}`}</span>
+        </button>
       </motion.div>
 
       <motion.div
@@ -72,11 +99,16 @@ function Showcase({ release, flip }: { release: Release; flip: boolean }) {
         whileInView="shown"
         viewport={{ once: true, margin: "-120px" }}
       >
-        <motion.p variants={rise} className="text-subheading opacity-70">
-          {kickerFor[release.format]}
-        </motion.p>
+        <motion.div variants={rise} className="flex items-center justify-between border-b border-current/25 pb-[12px] text-[13px] tracking-wider uppercase opacity-75">
+          <span>{kickerFor[release.format]}</span>
+          <span className="tabular-nums">
+            0{index + 1} / 0{total}
+          </span>
+        </motion.div>
         <motion.h3 variants={rise} className="mt-[28px] text-heading-lg font-normal">
-          {release.title}
+          <Link href={`/album/${release.slug}`} className="no-underline hover:underline">
+            {release.title}
+          </Link>
         </motion.h3>
         <motion.p variants={rise} className="mt-[10px] text-subheading">
           {release.artist}
@@ -85,13 +117,22 @@ function Showcase({ release, flip }: { release: Release; flip: boolean }) {
           {release.blurb}
         </motion.p>
         <motion.p variants={rise} className="mt-[18px] text-caption opacity-70">
-          {release.genre} · {release.year}
+          {release.genre} · {release.year} · Single principal: {release.track}
         </motion.p>
-        <motion.div variants={rise} className="mt-[44px] flex items-center gap-[28px]">
-          <OutlinedArrowLink href={spotifySearch(release)} label={`Escuchar ${release.title} en Spotify`} tone="current" external />
+        <motion.div variants={rise} className="mt-[44px] flex flex-wrap items-center gap-[20px]">
+          <button
+            type="button"
+            onClick={() => player.toggle(lead)}
+            className="flex h-[42px] items-center gap-[10px] px-[18px] text-[14px] font-medium transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.96]"
+            style={{ backgroundColor: release.ink, color: release.color }}
+          >
+            <PlayIcon playing={sounding} size={14} />
+            <span>{sounding ? "Pausar" : "Escuchar preview"}</span>
+          </button>
           <Link href={`/album/${release.slug}`} className="ghost-action ghost-action--current">
             Ver canciones
           </Link>
+          <OutlinedArrowLink href={spotifySearch(release)} label={`Escuchar ${release.title} en Spotify`} tone="current" external />
         </motion.div>
       </motion.div>
     </article>
@@ -140,12 +181,23 @@ export function EditorialAlbumSection({ releases }: { releases: Release[] }) {
       }
     >
       <div className="shell">
-        <h2 id="drops-title" className="type-display max-w-[11ch]">
-          Lo que suena esta semana
-        </h2>
+        <div className="flex flex-wrap items-end justify-between gap-[20px]">
+          <h2 id="drops-title" className="type-display max-w-[11ch]">
+            Lo que suena esta semana
+          </h2>
+          <p className="max-w-[34ch] text-caption opacity-75">
+            Tres discos seleccionados por la redacción. El escenario toma el color de cada portada al bajar.
+          </p>
+        </div>
         <div className="mt-[100px] flex flex-col gap-[145px]">
           {releases.map((release, i) => (
-            <Showcase key={release.slug} release={release} flip={i % 2 === 1} />
+            <Showcase
+              key={release.slug}
+              release={release}
+              index={i}
+              total={releases.length}
+              flip={i % 2 === 1}
+            />
           ))}
         </div>
       </div>

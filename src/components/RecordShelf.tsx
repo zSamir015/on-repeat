@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { leadSingle, spotifySearch, type Release } from "@/content/releases";
 import { OutlinedArrowLink } from "./OutlinedArrowLink";
 import { PlayIcon } from "./player/PlayIcon";
@@ -26,6 +26,7 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
   const [held, setHeld] = useState(false);
   const player = usePlayer();
   const running = !reduce && !held && inView && !player.playing;
+  const allPlayables = useMemo(() => releases.map(leadSingle), [releases]);
 
   useEffect(() => {
     if (!running) return;
@@ -36,11 +37,16 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
   const r = releases[active];
   const sounding = player.isPlaying(r.slug);
 
+  const step = (delta: number) => {
+    setHeld(true);
+    setActive((i) => (i + delta + releases.length) % releases.length);
+  };
+
   return (
     <section
       ref={stageRef}
       aria-labelledby="rotacion-title"
-      className="on-dark overflow-hidden bg-obsidian py-[100px] text-paper"
+      className="on-dark overflow-hidden border-t border-paper/15 bg-obsidian py-[100px] text-paper"
     >
       <div className="shell grid items-center gap-[45px] md:grid-cols-12 md:gap-[25px]">
         {/* Player */}
@@ -52,7 +58,8 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
                 {/* Record */}
                 <motion.div
                   aria-hidden
-                  className="absolute inset-[3%]"
+                  onClick={() => player.toggle(leadSingle(r), allPlayables)}
+                  className="absolute inset-[3%] cursor-pointer"
                   initial={reduce ? { x: "52%" } : { x: "0%" }}
                   animate={{ x: "52%" }}
                   transition={{ type: "spring", duration: 0.9, bounce: 0.18, delay: reduce ? 0 : 0.35 }}
@@ -61,11 +68,16 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
                     className={`vinyl h-full w-full ${sounding && !reduce ? "vinyl--spinning" : ""}`}
                     style={{ clipPath: "circle(50%)" }}
                   >
+                    {/* Color ring matching the album's signature hue */}
+                    <div
+                      className="absolute inset-[32%]"
+                      style={{ clipPath: "circle(50%)", backgroundColor: r.color }}
+                    />
                     <div className="absolute inset-[34%] overflow-hidden" style={{ clipPath: "circle(50%)" }}>
                       <Image src={r.cover} alt="" fill sizes="160px" className="object-cover" />
                     </div>
                     <div
-                      className="absolute top-1/2 left-1/2 size-[3%] -translate-x-1/2 -translate-y-1/2 bg-obsidian"
+                      className="absolute top-1/2 left-1/2 size-[3.5%] -translate-x-1/2 -translate-y-1/2 bg-obsidian"
                       style={{ clipPath: "circle(50%)" }}
                     />
                   </div>
@@ -73,18 +85,20 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
 
                 {/* Sleeve */}
                 <motion.div
-                  className="absolute inset-0 overflow-hidden bg-obsidian"
+                  className="group/sleeve absolute inset-0 overflow-hidden bg-obsidian"
                   initial={reduce ? false : { clipPath: "inset(100% 0% 0% 0%)" }}
                   animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
                   transition={{ duration: 0.55, ease: [0.77, 0, 0.175, 1] }}
                 >
-                  <Image
-                    src={r.cover}
-                    alt={`Portada de ${r.title}, ${r.artist}`}
-                    fill
-                    sizes="(min-width: 768px) 32vw, 64vw"
-                    className="object-cover"
-                  />
+                  <Link href={`/album/${r.slug}`} aria-label={`Abrir álbum ${r.title}`} className="absolute inset-0 block">
+                    <Image
+                      src={r.cover}
+                      alt={`Portada de ${r.title}, ${r.artist}`}
+                      fill
+                      sizes="(min-width: 768px) 32vw, 64vw"
+                      className="object-cover transition-transform duration-500 ease-[var(--ease-out)] group-hover/sleeve:scale-[1.03]"
+                    />
+                  </Link>
                 </motion.div>
               </motion.div>
             </AnimatePresence>
@@ -108,9 +122,9 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
             {/* Play control, sits on the sleeve's corner */}
             <button
               type="button"
-              onClick={() => player.toggle(leadSingle(r))}
+              onClick={() => player.toggle(leadSingle(r), allPlayables)}
               aria-label={sounding ? `Pausar ${r.track}` : `Escuchar ${r.track}, de ${r.artist}`}
-              className="absolute bottom-0 left-0 z-10 flex h-[56px] items-center gap-[12px] bg-paper px-[18px] text-obsidian transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.96]"
+              className="absolute bottom-0 left-0 z-10 flex h-[56px] items-center gap-[12px] bg-paper px-[18px] text-obsidian transition-transform duration-150 ease-[var(--ease-out)] hover:bg-ember-red hover:text-obsidian active:scale-[0.96]"
             >
               <PlayIcon playing={sounding} />
               <span className="text-[14px] font-medium">{sounding ? "Pausar" : "Escuchar preview"}</span>
@@ -120,9 +134,34 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
 
         {/* Info + selector */}
         <div className="md:col-span-5">
-          <h2 id="rotacion-title" className="kicker">
-            EN ROTACIÓN
-          </h2>
+          <div className="flex items-center justify-between gap-[16px]">
+            <h2 id="rotacion-title" className="kicker">
+              EN ROTACIÓN
+            </h2>
+            <div className="flex items-center gap-[10px]">
+              <span className="text-[13px] tabular-nums text-graphite">
+                {String(active + 1).padStart(2, "0")} / {String(releases.length).padStart(2, "0")}
+              </span>
+              <div className="flex items-center gap-[4px]">
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  aria-label="Disco anterior"
+                  className="grid size-[32px] place-items-center border border-paper/25 text-paper transition-colors hover:border-paper"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  aria-label="Siguiente disco"
+                  className="grid size-[32px] place-items-center border border-paper/25 text-paper transition-colors hover:border-paper"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div className="mt-[28px] min-h-[176px]" aria-live="polite">
             <AnimatePresence mode="wait" initial={false}>
@@ -141,24 +180,35 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
                 <motion.p variants={line} className="mt-[18px] text-subheading">
                   {r.artist}
                 </motion.p>
-                <motion.p variants={line} className="mt-[8px] text-caption text-graphite">
-                  {r.genre} · {r.year} · preview: {r.track}
+                <motion.p variants={line} className="mt-[8px] flex flex-wrap items-center gap-[8px] text-caption text-graphite">
+                  <span
+                    className="inline-block size-[8px]"
+                    style={{ backgroundColor: r.color }}
+                    aria-hidden
+                  />
+                  <span>
+                    {r.genre} · {r.year} · preview: <span className="text-paper/85">{r.track}</span>
+                  </span>
                 </motion.p>
               </motion.div>
             </AnimatePresence>
           </div>
 
-          <div className="mt-[28px] text-paper">
+          <div className="mt-[28px] flex flex-wrap items-center gap-[24px] text-paper">
+            <Link href={`/album/${r.slug}`} className="ghost-action ghost-action--current">
+              Ver canciones
+            </Link>
             <OutlinedArrowLink href={spotifySearch(r)} label={`Escuchar ${r.title} en Spotify`} tone="current" external />
           </div>
 
           <ul
-            className="mt-[44px] grid grid-cols-8 gap-[8px] md:grid-cols-4"
+            className="mt-[44px] grid grid-cols-4 gap-[8px]"
             onPointerLeave={() => setHeld(false)}
             aria-label="Elegir disco"
           >
             {releases.map((rel, i) => {
               const on = i === active;
+              const isRelSounding = player.isPlaying(rel.slug);
               return (
                 <li key={rel.slug}>
                   <button
@@ -175,17 +225,30 @@ export function RecordShelf({ releases }: { releases: Release[] }) {
                     }}
                     onBlur={() => setHeld(false)}
                     onClick={() => setActive(i)}
-                    className="group relative block aspect-square w-full overflow-hidden"
+                    className={`group relative block aspect-square w-full overflow-hidden border transition-colors ${
+                      on ? "border-paper" : "border-transparent hover:border-paper/40"
+                    }`}
                   >
                     <Image src={rel.cover} alt="" fill sizes="90px" className="object-cover" />
                     <span
-                      className={`absolute inset-0 bg-obsidian transition-opacity duration-300 ease-[var(--ease-out)] ${on ? "opacity-0" : "opacity-50 group-hover:opacity-20"}`}
+                      className={`absolute inset-0 bg-obsidian transition-opacity duration-300 ease-[var(--ease-out)] ${
+                        on ? "opacity-0" : "opacity-55 group-hover:opacity-20"
+                      }`}
                     />
-                    {/* Countdown to the next record */}
+                    <span className="absolute top-[6px] left-[6px] bg-obsidian/75 px-[4px] py-[1px] text-[10px] tabular-nums text-paper">
+                      0{i + 1}
+                    </span>
+                    {isRelSounding && (
+                      <span className="absolute top-[6px] right-[6px] flex h-[12px] items-end gap-[1.5px] bg-obsidian/80 p-[3px]" aria-hidden>
+                        <span className="eq-bar block w-[2px] bg-ember-red" />
+                        <span className="eq-bar block w-[2px] bg-ember-red" style={{ animationDelay: "-0.25s" }} />
+                        <span className="eq-bar block w-[2px] bg-ember-red" style={{ animationDelay: "-0.5s" }} />
+                      </span>
+                    )}
                     {/* While a preview sounds the bar follows the audio; otherwise it counts down to the next record */}
                     {player.current?.id === rel.slug ? (
                       <motion.span
-                        className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-paper"
+                        className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-ember-red"
                         style={{ scaleX: player.progress }}
                       />
                     ) : (

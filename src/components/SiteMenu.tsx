@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { setStudioOpen } from "@/content/custom-drop";
 import { setScrollLocked } from "./motion/SmoothScroll";
 import { usePlayer } from "./player/PlayerProvider";
 import { Logo } from "./brand/Logo";
@@ -14,6 +15,7 @@ const LINKS = [
   { label: "Drops", href: "/#drops" },
   { label: "Catálogo", href: "/#catalogo" },
   { label: "Artistas", href: "/#artistas" },
+  { label: "Marca", href: "/marca" },
 ];
 
 const easeOut = [0.23, 1, 0.32, 1] as const;
@@ -58,8 +60,8 @@ export function SiteMenu({ tone = "inherit", inlineFrom = "md" }: { tone?: Tone;
 
   return (
     <>
-      <nav aria-label="Principal" className={inline}>
-        <ul className={`flex gap-[18px] text-[14px] ${color}`}>
+      <nav aria-label="Principal" className={`${inline} items-center gap-[18px]`}>
+        <ul className={`flex items-center gap-[18px] text-[14px] ${color}`}>
           {LINKS.slice(1).map((l) => (
             <li key={l.href}>
               <Link href={l.href} className="no-underline hover:underline">
@@ -125,6 +127,18 @@ export function SiteMenu({ tone = "inherit", inlineFrom = "md" }: { tone?: Tone;
                       </li>
                     ))}
                   </ul>
+                  <div className="mt-[28px]">
+                    <Link
+                      href="/#subir"
+                      onClick={() => {
+                        setOpen(false);
+                        setStudioOpen(true);
+                      }}
+                      className="ghost-action"
+                    >
+                      Sube tu música
+                    </Link>
+                  </div>
                 </nav>
 
                 {current && (

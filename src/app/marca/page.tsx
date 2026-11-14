@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandInteractiveBadge } from "@/components/brand/BrandInteractiveBadge";
 import { Logo } from "@/components/brand/Logo";
-import { RotatingBadge } from "@/components/RotatingBadge";
 import { releases } from "@/content/releases";
 import { asset } from "@/lib/asset";
+
 
 export const metadata: Metadata = {
   title: "Marca — On Repeat",
@@ -224,12 +225,10 @@ export default function BrandPage() {
         </Section>
 
         <Section title="Sello" lead="El sello giratorio lleva el símbolo al centro. Va en el escenario negro, abajo a la derecha, y es la acción principal.">
-          <div className="flex items-center gap-[45px] bg-obsidian p-[45px]">
-            <RotatingBadge label="ESCUCHA" size={110} />
-            <RotatingBadge label="ON REPEAT" size={90} />
-          </div>
+          <BrandInteractiveBadge />
         </Section>
       </main>
     </>
   );
 }
+

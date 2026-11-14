@@ -28,19 +28,22 @@ function useLayout(content: string) {
   return useMemo(() => {
     const data = font.data as unknown as { glyphs: Record<string, { ha: number }>; resolution: number };
     const unit = 1 / data.resolution;
-    const lines = content.split("\n");
+    const rawLines = content.trim() ? content.split("\n") : ["ON REPEAT"];
+    const lines = rawLines.map((line) =>
+      [...line].filter((ch) => ch === " " || Boolean(data.glyphs[ch])).join("") || "ON REPEAT"
+    );
     const glyphs: Glyph[] = [];
-    let width = 0;
+    let width = 0.5;
     let i = 0;
 
     lines.forEach((line, row) => {
       const advances = [...line].map((ch) => (data.glyphs[ch]?.ha ?? 300) * unit);
-      const lineWidth = advances.reduce((a, b) => a + b, 0) + TRACKING * (advances.length - 1);
+      const lineWidth = advances.reduce((a, b) => a + b, 0) + TRACKING * Math.max(0, advances.length - 1);
       width = Math.max(width, lineWidth);
       let x = -lineWidth / 2;
       const y = ((lines.length - 1) / 2 - row) * LINE_ADVANCE - CAP / 2;
       [...line].forEach((ch, k) => {
-        if (ch !== " ") glyphs.push({ ch, x, y, w: advances[k], i: i++ });
+        if (ch !== " " && data.glyphs[ch]) glyphs.push({ ch, x, y, w: advances[k], i: i++ });
         x += advances[k] + TRACKING;
       });
     });
@@ -48,6 +51,7 @@ function useLayout(content: string) {
     return { glyphs, width, height: (lines.length - 1) * LINE_ADVANCE + CAP };
   }, [font, content]);
 }
+
 
 function Wordmark({ text, textNarrow, reduceMotion }: Omit<Props, "accents">) {
   const { viewport, pointer } = useThree();
@@ -169,10 +173,11 @@ export default function ChromeWordmark(props: Props & { active: boolean }) {
     >
       <Suspense fallback={null}>
         <StudioEnvironment sweep={!rest.reduceMotion} accents={accents} />
-        <Wordmark {...rest} />
+        <Wordmark key={rest.text} {...rest} />
       </Suspense>
     </Canvas>
   );
 }
+
 
 useFont.preload(FONT);

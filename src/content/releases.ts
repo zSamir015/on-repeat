@@ -26,17 +26,63 @@ export type Release = {
 export const spotifySearch = (r: { artist: string; title: string }) =>
   `https://open.spotify.com/search/${encodeURIComponent(`${r.artist} ${r.title}`)}`;
 
-export const featuredDrop = {
-  slug: "debi-tirar-mas-fotos",
-  artist: "BAD BUNNY",
-  artistMobile: "BAD\nBUNNY",
-  title: "DeBÍ TiRAR MáS FOToS",
-  format: "ALBUM",
-  status: "Ya disponible · 2025",
-  cover: asset("/covers/debi-tirar-mas-fotos.jpg"),
-  /** Gels that orbit the chrome: plantain green and late-afternoon sun from the cover. */
-  accents: ["#4fa83a", "#ffb547"],
+export type HeroDrop = {
+  slug: string;
+  artist: string;
+  artistMobile: string;
+  title: string;
+  format: string;
+  status: string;
+  cover: string;
+  /** Gels that orbit the chrome: 2-tone palette pulled from the cover. */
+  accents: [string, string];
 };
+
+export const heroDrops: HeroDrop[] = [
+  {
+    slug: "debi-tirar-mas-fotos",
+    artist: "BAD BUNNY",
+    artistMobile: "BAD\nBUNNY",
+    title: "DeBÍ TiRAR MáS FOToS",
+    format: "ALBUM",
+    status: "Ya disponible · 2025",
+    cover: asset("/covers/debi-tirar-mas-fotos.jpg"),
+    accents: ["#4fa83a", "#ffb547"],
+  },
+  {
+    slug: "brat",
+    artist: "CHARLI XCX",
+    artistMobile: "CHARLI\nXCX",
+    title: "BRAT",
+    format: "ALBUM",
+    status: "Club edition · 2024",
+    cover: asset("/covers/brat.jpg"),
+    accents: ["#8ace00", "#ffffff"],
+  },
+  {
+    slug: "hit-me-hard-and-soft",
+    artist: "BILLIE EILISH",
+    artistMobile: "BILLIE\nEILISH",
+    title: "HIT ME HARD AND SOFT",
+    format: "ALBUM",
+    status: "Edición estudio · 2024",
+    cover: asset("/covers/hit-me-hard-and-soft.jpg"),
+    accents: ["#1f6feb", "#7dd3fc"],
+  },
+  {
+    slug: "mayhem",
+    artist: "LADY GAGA",
+    artistMobile: "LADY\nGAGA",
+    title: "MAYHEM",
+    format: "ALBUM",
+    status: "Nuevo drop · 2025",
+    cover: asset("/covers/mayhem.jpg"),
+    accents: ["#ee3a49", "#d4d4d4"],
+  },
+];
+
+export const featuredDrop = heroDrops[0];
+
 
 export const releases: Release[] = [
   {
@@ -160,6 +206,7 @@ export const findRelease = (slug: string) => releases.find((r) => r.slug === slu
 /** The album's lead single, in the shape the player takes. */
 export const leadSingle = (r: Release) => ({
   id: r.slug,
+  albumSlug: r.slug,
   track: r.track,
   artist: r.artist,
   album: r.title,
@@ -168,3 +215,4 @@ export const leadSingle = (r: Release) => ({
   ink: r.ink,
   preview: r.preview,
 });
+
