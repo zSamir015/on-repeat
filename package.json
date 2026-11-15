@@ -1,6 +1,6 @@
 {
   "name": "on-repeat",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Music promo and catalog site for emerging artists: live WebGL chrome type, 30-second previews and per-album pages.",
   "scripts": {

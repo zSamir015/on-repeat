@@ -63,7 +63,8 @@ src/
     album/                   album page view
     motion/                  smooth scroll and viewport helpers
   content/
-    releases.ts              catalog data: titles, colors, lead single, preview URL
+    releases.ts              catalog data: titles, colors, lead single, preview URL, 3D hero drops
+    custom-drop.ts           shared store for the Artist Launch Studio & live 3D hero preview
     tracklists.json          per-album tracklists (generated, see below)
 scripts/                     asset and data generators
 public/
@@ -77,28 +78,32 @@ docs/
 
 ## How it works
 
-**Hero type.** Each letter of the artist's name is a separate `Text3D` mesh, laid out from the glyph
-advances in the typeface file so it can move independently: a staggered entrance, an idle wave,
-lift toward the pointer, and a skew driven by scroll velocity from Lenis. The chrome look comes
-entirely from the environment map: a set of `Lightformer` panels (sky, a thin horizon line, a
-sweeping strip and two colored gels from the cover palette) baked offline, so no HDR file is
-downloaded. The resting tilt places the horizon reflection across the letter faces.
+**Hero type & live stage switcher.** Each letter of the artist's name is a separate `Text3D` mesh,
+laid out from the glyph advances in the typeface file so it can move independently: a staggered
+entrance, an idle wave, lift toward the pointer, and a skew driven by scroll velocity from Lenis.
+The chrome look comes entirely from the environment map: a set of `Lightformer` panels (sky, a thin
+horizon line, a sweeping strip and two colored gels from the cover palette) baked offline, so no
+HDR file is downloaded. Visitors can switch the 3D stage between featured artists (`01`–`04`) or
+project their own artist name from the **Artist Launch Studio** (`ClosingStage`).
 
-**Audio.** `PlayerProvider` owns a single `HTMLAudioElement` for the whole site, so starting a
-preview anywhere stops the previous one, and playback survives client-side navigation. iTunes
-preview URLs send `Access-Control-Allow-Origin: *`, which lets the element run through a Web Audio
-`AnalyserNode`. The low-frequency energy is published as a module-level `MotionValue`
-(`audioLevel`), read every frame by the WebGL scene and by the logo dots without causing React
-renders. The graph is created on the first play because browsers require a user gesture.
+**Audio, queue & `‖: :‖` repeat mode.** `PlayerProvider` owns a single `HTMLAudioElement` for the
+whole site, with queue management (`prev`, `next`, continuous track-to-track auto-advance),
+interactive scrubbing (`seek`), and an **On Repeat (`‖: :‖`)** loop mode. iTunes preview URLs send
+`Access-Control-Allow-Origin: *`, which lets the element run through a Web Audio `AnalyserNode`.
+The low-frequency energy is published as a module-level `MotionValue` (`audioLevel`), read every
+frame by the WebGL scene and by the logo dots without causing React renders. Keyboard shortcuts:
+`Space` (play/pause), `←` / `→` (seek ±5s), `R` (toggle `‖: :‖` repeat), `M` (mute).
 
-**Album color.** Each release carries a `color` and an `ink` sampled from its cover. The featured
-section interpolates its background between albums as you scroll, the catalog section floods to
-the hovered album's color, and album pages, the mini player and the logo on those pages take the
-album's ink.
+**Catalog & album color.** Each release carries a `color` and an `ink` sampled from its cover. The
+featured section interpolates its background between albums as you scroll and allows in-place
+preview playback; the catalog supports both a typographic **Índice** list view and a **Portadas**
+cover grid view, sorting (`Curado`, `Año`, `A–Z`), genre counts, and floods to the hovered album's
+color with a viewport-clamped floating cover preview.
 
 **Album pages.** Generated statically with `generateStaticParams`. Covers and titles are wrapped in
 React's `<ViewTransition>` with a shared name, so navigating from the home page morphs the cover
-(or the catalog title) into the album header without a client router library.
+(or the catalog title) into the album header without a client router library. Clicking any track
+queues the entire album for continuous playback and displays a per-row progress bar.
 
 **Logo.** The name sits between the two musical repeat signs. `scripts/build-logo.mjs` outlines
 the word from Inter Regular with manual kerning and writes the SVG assets, the favicon and the
